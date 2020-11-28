@@ -36,7 +36,7 @@ SX126x_Linux::SX126x_Linux(const std::string &spi_dev_path, uint16_t gpio_dev_nu
 
 	int i = 1;
 	for (auto it : {pin_config.dio1, pin_config.dio2, pin_config.dio3}) {
-		std::string label = "SX128x DIO";
+		std::string label = "SX126x DIO";
 		label += std::to_string(i);
 		i++;
 
