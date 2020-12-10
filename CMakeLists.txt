@@ -22,13 +22,13 @@ CPMAddPackage(
 CPMAddPackage(
         NAME GPIOPlusPlus
         GITHUB_REPOSITORY YukiWorkshop/GPIOPlusPlus
-        VERSION 0.0.2
+        VERSION 0.0.5
 )
 
 CPMAddPackage(
         NAME SPPI
         GITHUB_REPOSITORY YukiWorkshop/SPPI
-        VERSION 0.0.5
+        VERSION 0.0.6
 )
 
 add_library(sx126x_linux_driver SX126x_Linux.cpp SX126x_Linux.hpp)
