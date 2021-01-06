@@ -19,3 +19,8 @@ See `Test.cpp`. **Read the comments carefully.**
 
 ## License
 LGPLv3
+
+### Notice for users in China
+This project may or may not have applied for software copyright in China. If you violate the open source license agreement of this project, we reserve the right to sue you.
+
+本项目可能有，也可能没有，申请了中国的软件著作权。如果您违反了本项目的开源许可协议，我们将保留起诉您的权利。
