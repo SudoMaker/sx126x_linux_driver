@@ -18,7 +18,7 @@ They will be automatically installed by CPM.
 See `Test.cpp`. **Read the comments carefully.**
 
 ## License
-LGPLv3
+AGPLv3
 
 ### Notice for users in China
 This project may or may not have applied for software copyright in China. If you violate the open source license agreement of this project, we reserve the right to sue you.
