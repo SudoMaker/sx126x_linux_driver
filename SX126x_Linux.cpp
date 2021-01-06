@@ -1,18 +1,18 @@
 /*
     This file is part of SX126x Linux driver.
-    Copyright (C) 2020 ReimuNotMoe
+    Copyright (C) 2020, 2021 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as
+    it under the terms of the GNU Affero General Public License as
     published by the Free Software Foundation, either version 3 of the
     License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
+    GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
+    You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -20,12 +20,15 @@
 
 SX126x_Linux::SX126x_Linux(const std::string &spi_dev_path, uint16_t gpio_dev_num, SX126x_Linux::PinConfig pin_config) :
 	pin_cfg(pin_config),
-	RadioSpi(spi_dev_path, SPI_MODE_0|SPI_NO_CS, 8, 500000),
+	RadioSpi(spi_dev_path, pin_config.nss >= 0 ? [this](bool cs){if (cs) RadioNss->write(0); else RadioNss->write(1);} : std::function<void(bool)>(), SPI_MODE_0, 8, 500000),
 	RadioGpio(gpio_dev_num),
 	Busy(RadioGpio.line(pin_cfg.busy, GPIO::LineMode::Input, 0, "SX126x BUSY")),
-	RadioNss(RadioGpio.line(pin_cfg.nss, GPIO::LineMode::Output, 1, "SX126x NSS")),
 	RadioReset(RadioGpio.line(pin_cfg.nrst, GPIO::LineMode::Output, 1, "SX126x NRESET"))
 {
+	if (pin_config.nss >= 0) {
+		RadioNss = RadioGpio.line(pin_cfg.nss, GPIO::LineMode::Output, 1, "SX126x NSS");
+	}
+
 	if (pin_config.tx_en >= 0) {
 		TxEn = RadioGpio.line(pin_cfg.tx_en, GPIO::LineMode::Output, 0, "SX126x TXEN");
 	}
@@ -41,7 +44,7 @@ SX126x_Linux::SX126x_Linux(const std::string &spi_dev_path, uint16_t gpio_dev_nu
 		i++;
 
 		if (it != -1) {
-			RadioGpio.on_event(it, GPIO::LineMode::Input, GPIO::EventMode::RisingEdge,
+			RadioGpio.add_event(it, GPIO::LineMode::Input, GPIO::EventMode::RisingEdge,
 					   [this](GPIO::EventType t, uint64_t) {
 						   if (t == GPIO::EventType::RisingEdge)
 							   ProcessIrqs();
@@ -93,14 +96,9 @@ void SX126x_Linux::HalGpioWrite(SX126x::GpioPinFunction_t func, uint8_t value) {
 void SX126x_Linux::HalSpiTransfer(uint8_t *buffer_in, const uint8_t *buffer_out, uint16_t size) {
 	if (ExtLock) {
 		std::lock_guard<std::mutex> lg(*ExtLock);
-
-		RadioNss.write(0);
 		RadioSpi.transfer(buffer_out, buffer_in, size);
-		RadioNss.write(1);
 	} else {
-		RadioNss.write(0);
 		RadioSpi.transfer(buffer_out, buffer_in, size);
-		RadioNss.write(1);
 	}
 }
 
